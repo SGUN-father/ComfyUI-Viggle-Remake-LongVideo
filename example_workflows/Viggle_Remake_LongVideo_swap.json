@@ -1,0 +1,1958 @@
+{
+ "id": "55980bd5-10ab-4f20-a2a0-750ee6d55626",
+ "revision": 0,
+ "last_node_id": 38,
+ "last_link_id": 34,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "MarkdownNote",
+   "pos": [
+    20,
+    1380
+   ],
+   "size": [
+    1320,
+    900
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "使用说明（先看这里） / Read me first",
+   "properties": {},
+   "widgets_values": [
+    "# Viggle Remake 视频换人（长视频版） / Video Character Swap (long-video version)\n\n把源视频里的人物换成参考图里的人物，保留动作、镜头、字幕和原音频。用 `Viggle Remake Long Video by神棍` 分窗口生成，所以能做 15～20 秒。\nReplaces the people in the source video with the people in your reference images, keeping motion, camera, subtitles and the original audio. `Viggle Remake Long Video by神棍` generates it window by window, so 15–20 s clips work.\n\n## 每次要改的 / What to change each time\n节点颜色：**绿色** = 上传素材，**红色** = 要调的参数，**灰色** = 一般不用动。\nNode colours: **green** = uploads, **red** = settings to adjust, **grey** = usually leave alone.\n\n1. **源视频 Source video**：在“① 素材上传”组的 Load Video 上传视频，`frame_load_cap` 填大概总帧数（24fps：15 秒≈360，20 秒≈480；填 0 = 整段，很长的视频会很慢）。帧数会自动向下取成 17N+5。\n   Upload it in Load Video of group \"① 素材上传\" and set `frame_load_cap` to roughly the total frames (24 fps: 15 s ≈ 360, 20 s ≈ 480; 0 = whole video, very slow for long videos). The count is rounded down to 17N+5 automatically.\n2. **参考图 Reference images**：Reference 1 放人物四视图（脸部特写 + 正面 + 侧面 + 背面）。多人替换：备用的 Reference 2/3/4 也在“① 素材上传”组，把它们连到“提示词与条件”节点的 ref_2/3/4，最多 4 张图。\n   Put a character sheet (face close-up + front + side + back) in Reference 1. For multi-person swaps connect the spare Reference 2/3/4 (also in group \"① 素材上传\") to ref_2/3/4 of the \"提示词与条件\" node (max 4 images).\n3. **提示词 Prompt**：在“提示词与条件”节点里按六段式写。`<Video 1>` = 源视频，`<Picture N>` = 第 N 张参考图，`<Subject N>` = 视频里被替换的人（写清他的位置和衣着，再写他换成哪张图）。换素材必须重写，现在的是舞蹈视频的示例。\n   Write it in the \"提示词与条件\" node in the six-section format. `<Video 1>` = source video, `<Picture N>` = Nth reference image, `<Subject N>` = a person in the video to replace (describe position and clothing, then say which picture they become). Rewrite it for every new clip; the current one is a dance-video example.\n4. **short_edge**（在“② 帧数 & 短边”组）：480 = 稳，已实测；736 = 官方清晰档，用本工作流没实测过；576 = 实测多人长镜头出现过\"脸没换成功\"，不推荐。\n   取值范围 480～736，必须是 32 的倍数。⚠️ 短边是用连线送进去的，填超过 736 **不会报错**，会照样跑更大的分辨率，但不受官方支持、显存会暴涨。\n   480 = stable, tested; 736 = official high-quality size, not tested with this workflow; 576 = in a test the faces were not replaced in a long multi-person shot, not recommended.\n   Allowed: 480–736, a multiple of 32. ⚠️ It comes in through a link, so values above 736 do **not** error out: it still runs at the larger size, unsupported and with much more VRAM.\n5. 点运行，成片在 `output/viggle_remake/`。 / Run. The result is saved in `output/viggle_remake/`.\n\n## 显存不够？ / Not enough VRAM?\n“④ LoRA & 加速 / 省显存”组里有两个 KJNodes 省显存节点（ChunkFeedForward、Low VRAM Attention），默认是屏蔽的（紫色）。低显存用户选中它们按 `Ctrl+B` 打开；高配用户保持关闭，开了会降低生成速度。\nGroup \"④ LoRA & 加速 / 省显存\" has two KJNodes low-VRAM nodes (ChunkFeedForward, Low VRAM Attention), bypassed by default (purple). Low-VRAM users: select them and press `Ctrl+B` to enable. High-end GPUs: leave them off, they slow generation down.\n\n## 不要动 / Do not change\n- `pins` 保持空：参考图是设定图，不是视频帧，钉上去会毁掉那一帧。\n  Keep `pins` empty: reference images are character sheets, not video frames; pinning one ruins that frame.\n- 窗口 124 帧（≈5.2 秒），重叠 39 帧，在“⑥ 长视频窗口 & 采样”组的 `Viggle Remake Long Video by神棍` 节点里设置。\n  Window = 124 frames (≈5.2 s), overlap 39, set in `Viggle Remake Long Video by神棍` in group \"⑥ 长视频窗口 & 采样\".\n- 源视频按 24fps 读入（Load Video 的 force_rate 已设 24）。 / The source is read at 24 fps (force_rate = 24 on Load Video).\n\n## 节点包 / Node pack\n本工作流只用 `ComfyUI-Viggle-Remake-LongVideo`（by神棍）的三个节点 + ComfyUI 自带节点，不需要官方 Viggle 节点包。需要 ComfyUI 0.44.0 或更新。\n`Viggle Remake Conditioning by神棍` 的 `frames` 上限已放开到 10000（官方是 345），长视频直接用。\nUses the three `by神棍` nodes + core ComfyUI nodes only; the official Viggle pack is not needed. Needs ComfyUI 0.44.0+.\nThe `frames` limit of `Viggle Remake Conditioning by神棍` is 10000 (official: 345).\n"
+   ],
+   "widgets_values_named": {
+    "text": "# Viggle Remake 视频换人（长视频版） / Video Character Swap (long-video version)\n\n把源视频里的人物换成参考图里的人物，保留动作、镜头、字幕和原音频。用官方 Context Windows 分窗口生成，所以能做 15～20 秒。\nReplaces the people in the source video with the people in your reference images, keeping motion, camera, subtitles and the original audio. The official Context Windows generate it window by window, so 15–20 s clips work.\n\n## 每次要改的（绿色节点） / What to change each time (green nodes)\n1. **源视频 Source video**：在 ① 的 Load Video 上传视频，`frame_load_cap` 填大概总帧数（24fps：15 秒≈360，20 秒≈480；填 0 = 整段，很长的视频会很慢）。帧数会自动向下取成 17N+5。\n   Upload it in ① Load Video and set `frame_load_cap` to roughly the total frames (24 fps: 15 s ≈ 360, 20 s ≈ 480; 0 = whole video, very slow for long videos). The count is rounded down to 17N+5 automatically.\n2. **参考图 Reference images**：Reference 1 放人物四视图（脸部特写 + 正面 + 侧面 + 背面）。多人替换：把 Reference 2/3/4 连到 ③ 的 ref_2/3/4，最多 4 张图。\n   Put a character sheet (face close-up + front + side + back) in Reference 1. For multi-person swaps connect Reference 2/3/4 to ref_2/3/4 in ③ (max 4 images).\n3. **提示词 Prompt**：在 ③ 里按六段式写。`<Video 1>` = 源视频，`<Picture N>` = 第 N 张参考图，`<Subject N>` = 视频里被替换的人（写清他的位置和衣着，再写他换成哪张图）。换素材必须重写，现在的是舞蹈视频的示例。\n   Write it in ③ in the six-section format. `<Video 1>` = source video, `<Picture N>` = Nth reference image, `<Subject N>` = a person in the video to replace (describe position and clothing, then say which picture they become). Rewrite it for every new clip; the current one is a dance-video example.\n4. **short_edge**：480 = 稳，已实测；736 = 官方清晰档，用本工作流没实测过；576 = 实测多人长镜头出现过\"脸没换成功\"，不推荐。\n   取值范围 480～736，必须是 32 的倍数。⚠️ 短边是用连线送进去的，填超过 736 **不会报错**，会照样跑更大的分辨率，但不受官方支持、显存会暴涨。\n   480 = stable, tested; 736 = official high-quality size, not tested with this workflow; 576 = in a test the faces were not replaced in a long multi-person shot, not recommended.\n   Allowed: 480–736, a multiple of 32. ⚠️ It comes in through a link, so values above 736 do **not** error out: it still runs at the larger size, unsupported and with much more VRAM.\n5. 点运行，成片在 `output/viggle_remake/`。 / Run. The result is saved in `output/viggle_remake/`.\n\n## 显存不够？ / Not enough VRAM?\n④ 里有两个 KJNodes 省显存节点（ChunkFeedForward、Low VRAM Attention），默认是屏蔽的（紫色）。低显存用户选中它们按 `Ctrl+B` 打开；高配用户保持关闭，开了会降低生成速度。\n④ has two KJNodes low-VRAM nodes (ChunkFeedForward, Low VRAM Attention), bypassed by default (purple). Low-VRAM users: select them and press `Ctrl+B` to enable. High-end GPUs: leave them off, they slow generation down.\n\n## 不要动 / Do not change\n- `pins` 保持空：参考图是设定图，不是视频帧，钉上去会毁掉那一帧。\n  Keep `pins` empty: reference images are character sheets, not video frames; pinning one ruins that frame.\n- 窗口 124 帧（≈5.2 秒），重叠 39 帧；`Slice Source By Window` 必须接在 `MiniMax H3 Context Windows` 后面。\n  Window = 124 frames (≈5.2 s), overlap 39; `Slice Source By Window` must come right after `MiniMax H3 Context Windows`.\n- 源视频按 24fps 读入（Load Video 的 force_rate 已设 24）。 / The source is read at 24 fps (force_rate = 24 on Load Video).\n"
+   },
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 2,
+   "type": "VHS_LoadVideo",
+   "pos": [
+    20,
+    90
+   ],
+   "size": [
+    520,
+    1220
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "meta_batch",
+     "shape": 7,
+     "type": "VHS_BatchManager",
+     "link": null
+    },
+    {
+     "name": "vae",
+     "shape": 7,
+     "type": "VAE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      9
+     ]
+    },
+    {
+     "name": "frame_count",
+     "type": "INT",
+     "links": [
+      11
+     ]
+    },
+    {
+     "name": "audio",
+     "type": "AUDIO",
+     "links": [
+      10
+     ]
+    },
+    {
+     "name": "video_info",
+     "type": "VHS_VIDEOINFO",
+     "links": null
+    }
+   ],
+   "title": "源视频 Source video（frame_load_cap ≈ 总帧数 / total frames）",
+   "properties": {
+    "cnr_id": "comfyui-videohelpersuite",
+    "ver": "4d907bee61e92c2e65af3bd6383a4e4d356126d1",
+    "Node name for S&R": "VHS_LoadVideo"
+   },
+   "widgets_values": {
+    "video": "09bb74f5925176dda1b6b747972c479b.mp4",
+    "force_rate": 24,
+    "custom_width": 0,
+    "custom_height": 0,
+    "frame_load_cap": 362,
+    "skip_first_frames": 0,
+    "select_every_nth": 1,
+    "format": "H3",
+    "choose video to upload": "image",
+    "videopreview": {
+     "hidden": false,
+     "paused": false,
+     "params": {
+      "filename": "09bb74f5925176dda1b6b747972c479b.mp4",
+      "type": "input",
+      "format": "video/mp4",
+      "force_rate": 24,
+      "custom_width": 0,
+      "custom_height": 0,
+      "frame_load_cap": 362,
+      "skip_first_frames": 0,
+      "select_every_nth": 1
+     }
+    }
+   },
+   "widgets_values_named": {
+    "video": "09bb74f5925176dda1b6b747972c479b.mp4",
+    "force_rate": 24,
+    "custom_width": 0,
+    "custom_height": 0,
+    "frame_load_cap": 362,
+    "skip_first_frames": 0,
+    "select_every_nth": 1,
+    "format": "H3",
+    "choose video to upload": "image",
+    "videopreview": {
+     "hidden": false,
+     "paused": false,
+     "params": {
+      "filename": "09bb74f5925176dda1b6b747972c479b.mp4",
+      "type": "input",
+      "format": "video/mp4",
+      "force_rate": 24,
+      "custom_width": 0,
+      "custom_height": 0,
+      "frame_load_cap": 362,
+      "skip_first_frames": 0,
+      "select_every_nth": 1
+     }
+    }
+   },
+   "color": "#232",
+   "bgcolor": "#353"
+  },
+  {
+   "id": 3,
+   "type": "ComfyMathExpression",
+   "pos": [
+    1420,
+    90
+   ],
+   "size": [
+    400,
+    200
+   ],
+   "flags": {},
+   "order": 21,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "values.a",
+     "type": "FLOAT,INT,BOOLEAN",
+     "link": 11
+    },
+    {
+     "name": "values.b",
+     "shape": 7,
+     "type": "FLOAT,INT,BOOLEAN",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "FLOAT",
+     "type": "FLOAT",
+     "links": null
+    },
+    {
+     "name": "INT",
+     "type": "INT",
+     "links": [
+      12
+     ]
+    },
+    {
+     "name": "BOOL",
+     "type": "BOOLEAN",
+     "links": null
+    }
+   ],
+   "title": "帧数取整 Frame count → 17N+5（向下 round down）",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "ComfyMathExpression"
+   },
+   "widgets_values": [
+    "max(floor((a - 5) / 17), 1) * 17 + 5"
+   ],
+   "widgets_values_named": {
+    "expression": "max(floor((a - 5) / 17), 1) * 17 + 5"
+   }
+  },
+  {
+   "id": 4,
+   "type": "MarkdownNote",
+   "pos": [
+    1420,
+    1380
+   ],
+   "size": [
+    400,
+    470
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "说明 Note：帧数取整 / frame count",
+   "properties": {},
+   "widgets_values": [
+    "**为什么要这个运算节点 / Why this node**\nVHS 读出的 `frame_count` 先接到这里，再接给“提示词与条件”节点的 `frames`。\n`frame_count` from VHS goes through here before it reaches `frames` of the \"提示词与条件\" node.\n\n公式 / Formula：`max(floor((a-5)/17), 1)*17+5`\n= 向下取成 17N+5（Viggle 节点要求，否则报错）。\n= round down to 17N+5 (required by the Viggle node, otherwise it errors).\n例 / Example：480 → 464；362 → 362\n\nVHS 的 H3 格式自己也会取整，这里是双保险。\nVHS' H3 format already rounds; this is a second safety net."
+   ],
+   "widgets_values_named": {
+    "text": "**为什么要这个运算节点 / Why this node**\nVHS 读出的 `frame_count` 先接到这里，再接给 ③ 的 `frames`。\n`frame_count` from VHS goes through here before it reaches `frames` in ③.\n\n公式 / Formula：`max(floor((a-5)/17), 1)*17+5`\n= 向下取成 17N+5（Viggle 节点要求，否则报错）。\n= round down to 17N+5 (required by the Viggle node, otherwise it errors).\n例 / Example：480 → 464；362 → 362\n\nVHS 的 H3 格式自己也会取整，这里是双保险。\nVHS' H3 format already rounds; this is a second safety net."
+   },
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 5,
+   "type": "LoadImage",
+   "pos": [
+    580,
+    90
+   ],
+   "size": [
+    370,
+    580
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      13
+     ]
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": null
+    }
+   ],
+   "title": "参考图 1 Reference 1 → <Picture 1>",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "c1_moss_00001_.png",
+    "image"
+   ],
+   "widgets_values_named": {
+    "image": "c1_moss_00001_.png",
+    "upload": "image"
+   },
+   "color": "#232",
+   "bgcolor": "#353"
+  },
+  {
+   "id": 6,
+   "type": "MarkdownNote",
+   "pos": [
+    20,
+    2340
+   ],
+   "size": [
+    1320,
+    280
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "说明 Note：多人替换 / multi-person",
+   "properties": {},
+   "widgets_values": [
+    "**多人替换 / Multi-person swap**\n需要几个人就把几张参考图连到“提示词与条件”节点的 ref_2 / ref_3 / ref_4。提示词里 `<Picture 2>`、`<Picture 3>` 对应这里的顺序。备用的三张在上面“① 素材上传”组里，不连就不会运行。\nConnect as many reference images as people to ref_2 / ref_3 / ref_4 of the \"提示词与条件\" node. `<Picture 2>`, `<Picture 3>` in the prompt follow this order. The three spares are in group \"① 素材上传\" above; unconnected ones are not executed."
+   ],
+   "widgets_values_named": {
+    "text": "**多人替换 / Multi-person swap**\n需要几个人就把几张参考图连到 ③ 的 ref_2 / ref_3 / ref_4。提示词里 `<Picture 2>`、`<Picture 3>` 对应这里的顺序。这三个是备用的，不连就不会运行。\nConnect as many reference images as people to ref_2 / ref_3 / ref_4 in ③. `<Picture 2>`, `<Picture 3>` in the prompt follow this order. These three are spares; unconnected ones are not executed."
+   },
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 7,
+   "type": "LoadImage",
+   "pos": [
+    970,
+    90
+   ],
+   "size": [
+    370,
+    580
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": null
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": null
+    }
+   ],
+   "title": "参考图 2 Reference 2（备用 spare → ref_2）",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "0 (1).png",
+    "image"
+   ],
+   "widgets_values_named": {
+    "image": "0 (1).png",
+    "upload": "image"
+   },
+   "color": "#232",
+   "bgcolor": "#353"
+  },
+  {
+   "id": 8,
+   "type": "LoadImage",
+   "pos": [
+    580,
+    730
+   ],
+   "size": [
+    370,
+    580
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": null
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": null
+    }
+   ],
+   "title": "参考图 3 Reference 3（备用 spare → ref_3）",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "0 (1).png",
+    "image"
+   ],
+   "widgets_values_named": {
+    "image": "0 (1).png",
+    "upload": "image"
+   },
+   "color": "#232",
+   "bgcolor": "#353"
+  },
+  {
+   "id": 9,
+   "type": "LoadImage",
+   "pos": [
+    970,
+    730
+   ],
+   "size": [
+    370,
+    580
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": null
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": null
+    }
+   ],
+   "title": "参考图 4 Reference 4（备用 spare → ref_4）",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "0 (1).png",
+    "image"
+   ],
+   "widgets_values_named": {
+    "image": "0 (1).png",
+    "upload": "image"
+   },
+   "color": "#232",
+   "bgcolor": "#353"
+  },
+  {
+   "id": 10,
+   "type": "UNETLoader",
+   "pos": [
+    1900,
+    90
+   ],
+   "size": [
+    420,
+    90
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      1
+     ]
+    }
+   ],
+   "title": "H3 底模 Base model (fl2va int8)",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "minimax_h3_fl2va_int8_convrot.safetensors",
+    "default"
+   ],
+   "widgets_values_named": {
+    "unet_name": "minimax_h3_fl2va_int8_convrot.safetensors",
+    "weight_dtype": "default"
+   }
+  },
+  {
+   "id": 11,
+   "type": "LoraLoaderBypassModelOnly",
+   "pos": [
+    2400,
+    90
+   ],
+   "size": [
+    320,
+    90
+   ],
+   "flags": {},
+   "order": 22,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 1
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      31
+     ]
+    }
+   ],
+   "title": "Viggle swap LoRA",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "LoraLoaderBypassModelOnly"
+   },
+   "widgets_values": [
+    "viggle_remake_swap_comfyui.safetensors",
+    1
+   ],
+   "widgets_values_named": {
+    "lora_name": "viggle_remake_swap_comfyui.safetensors",
+    "strength_model": 1
+   }
+  },
+  {
+   "id": 12,
+   "type": "CLIPLoader",
+   "pos": [
+    1900,
+    240
+   ],
+   "size": [
+    420,
+    110
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "links": [
+      6
+     ]
+    }
+   ],
+   "title": "文本编码器 Text encoder (qwen3vl 32b int8)",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "CLIPLoader"
+   },
+   "widgets_values": [
+    "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+    "minimax",
+    "default"
+   ],
+   "widgets_values_named": {
+    "clip_name": "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+    "type": "minimax",
+    "device": "default"
+   }
+  },
+  {
+   "id": 13,
+   "type": "VAELoader",
+   "pos": [
+    1900,
+    410
+   ],
+   "size": [
+    420,
+    60
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      7,
+      22
+     ]
+    }
+   ],
+   "title": "视频 VAE Video VAE",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "minimax_h3_video_vae_fp16.safetensors"
+   ],
+   "widgets_values_named": {
+    "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+   }
+  },
+  {
+   "id": 14,
+   "type": "VAELoader",
+   "pos": [
+    1900,
+    530
+   ],
+   "size": [
+    420,
+    60
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      8,
+      24
+     ]
+    }
+   ],
+   "title": "音频 VAE Audio VAE",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "minimax_h3_audio_vae_fp32.safetensors"
+   ],
+   "widgets_values_named": {
+    "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+   }
+  },
+  {
+   "id": 15,
+   "type": "MarkdownNote",
+   "pos": [
+    1900,
+    1380
+   ],
+   "size": [
+    420,
+    430
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "说明 Note：模型 / models",
+   "properties": {},
+   "widgets_values": [
+    "**模型 / Models**\n- 底模 Base：H3 fl2va int8（不能用 ref2va / not ref2va）\n- LoRA：Viggle swap（必须用 `LoraLoaderBypassModelOnly`，不能用普通 LoRA 加载节点 / must be `LoraLoaderBypassModelOnly`, not a normal LoRA loader）\n- 文本编码器 Text encoder：qwen3vl 32b int8\n- 两个 VAE / Two VAEs：视频 video + 音频 audio\n\n想用 edit 模式（换背景、增删物体）要换成 edit LoRA，官方说 sigmas 也不同，需按官方 COMFYUI.md 改（我没验证过）。\nFor edit mode (change background, add/remove objects) use the edit LoRA; the official docs say the sigmas differ too, see the official COMFYUI.md (not verified by me)."
+   ],
+   "widgets_values_named": {
+    "text": "**模型 / Models**\n- 底模 Base：H3 fl2va int8（不能用 ref2va / not ref2va）\n- LoRA：Viggle swap（必须用 `LoraLoaderBypassModelOnly`，不能用普通 LoRA 加载节点 / must be `LoraLoaderBypassModelOnly`, not a normal LoRA loader）\n- 文本编码器 Text encoder：qwen3vl 32b int8\n- 两个 VAE / Two VAEs：视频 video + 音频 audio\n\n想用 edit 模式（换背景、增删物体）要换成 edit LoRA，官方说 sigmas 也不同，需按官方 COMFYUI.md 改（我没验证过）。\nFor edit mode (change background, add/remove objects) use the edit LoRA; the official docs say the sigmas differ too, see the official COMFYUI.md (not verified by me)."
+   },
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 16,
+   "type": "ViggleRemakeConditioningByShenGun",
+   "pos": [
+    4200,
+    90
+   ],
+   "size": [
+    700,
+    1220
+   ],
+   "flags": {},
+   "order": 23,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 6
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 7
+    },
+    {
+     "name": "audio_vae",
+     "type": "VAE",
+     "link": 8
+    },
+    {
+     "name": "source",
+     "type": "IMAGE",
+     "link": 9
+    },
+    {
+     "name": "ref_1",
+     "type": "IMAGE",
+     "link": 13
+    },
+    {
+     "name": "audio",
+     "shape": 7,
+     "type": "AUDIO",
+     "link": 10
+    },
+    {
+     "name": "ref_2",
+     "shape": 7,
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "ref_3",
+     "shape": 7,
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "ref_4",
+     "shape": 7,
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "frames",
+     "type": "INT",
+     "widget": {
+      "name": "frames"
+     },
+     "link": 12
+    },
+    {
+     "name": "short_edge",
+     "type": "INT",
+     "widget": {
+      "name": "short_edge"
+     },
+     "link": 28
+    }
+   ],
+   "outputs": [
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "links": [
+      14,
+      15
+     ]
+    },
+    {
+     "name": "latent",
+     "type": "LATENT",
+     "links": [
+      20
+     ]
+    }
+   ],
+   "title": "提示词与条件 Conditioning by神棍（改提示词 / short_edge）",
+   "properties": {
+    "Node name for S&R": "ViggleRemakeConditioningByShenGun"
+   },
+   "widgets_values": [
+    "subject_definitions:\n<Video 1> is the source video for the editing task: one continuous handheld vertical take in a bright hallway with pale-blue walls, white ceiling moulding, a dark red wooden door and a white pillar on the right, in which a young woman in a white long-sleeve top with a navy sailor collar and a red ribbon bow, a black layered ruffle mini skirt and white knee socks, with black twin tails, dances a cute pop choreography to music.\n<Picture 1> is a character reference sheet of the target dancer: the same young woman shown four times side by side on a plain white background, as a face close-up, a full-body front view, a full-body side view and a full-body back view.\n<Subject 1> is the woman in <Picture 1>: a slim young woman with long straight chestnut-brown hair with see-through bangs and layered ends worn down, fair skin, small gold hoop earrings, a black strapless tube top with blue polka dots, a high-waisted blue denim cutoff shorts with frayed hems and a brown leather belt with a gold buckle, a thin gold chain bracelet, and brown leather heeled mule sandals. She replaces the dancer in the white sailor top and black ruffle skirt in <Video 1>.\n\nsummary:\n[video editing + character replacement] The target video is an edited version of <Video 1> in which the dancer becomes <Subject 1>, looking exactly as she does in <Picture 1>, performing the same choreography. The pale-blue hallway, the dark red door, the white pillar and the soft daylight are unchanged. The single continuous handheld shot, the camera framing and movement, the dance moves, the timing and the beat of <Video 1> are kept.\n\nretention_analysis:\n<Video 1> (source video editing): fully_preserved - the single continuous shot with no cut, the handheld camera framing and movement, the hallway location and lighting, the thin black border around the picture that appears in the middle of the clip, and every dance move, hand gesture, turn and the timing of the choreography, including the moment she turns to show her back, are copied frame for frame.\n<Picture 1> (character reference sheet, not a frame of the target video): reference - her face, her long straight chestnut hair with bangs, the polka-dot tube top, the denim shorts with the belt, the bracelet and the sandals are taken from the four views of <Picture 1>; the plain white background of <Picture 1> is not used.\n<Subject 1> (appears in [Shot 1]): fully_preserved - her face, the long straight chestnut hair with bangs (no twin tails), the black blue-polka-dot tube top, the denim cutoff shorts with the brown belt and gold buckle, and the gold bracelet stay identical in every frame, also when she turns around and when her hair swings.\n\ndetailed_description:\nThe target video is a realistic indoor handheld scene in a bright hallway with soft daylight and natural colours, in a full-body vertical frame.\n[Shot 1] At 00:00.000 <Subject 1> dances in the hallway with her hands near her chest, matching the pose of <Video 1>. At about 00:02.000 she turns her body and brings her hands to her chest. At about 00:04.000 she steps to the side with a fist at her chest. At about 00:06.000 she raises one arm beside her head in a wide stance. At about 00:08.000 she waves both hands beside her cheeks facing the camera. At about 00:10.000 she turns her back to the camera, showing her long straight hair and the back of the tube top. At about 00:12.000 she turns around again and her long hair swings. At about 00:14.000 she faces the camera again with her arms crossing playfully. The dance continues smoothly for the whole 15 seconds with the same energy as <Video 1>. The camera is handheld throughout.\nIn every frame, from the first to the last, the dancer is this same woman exactly as in <Picture 1>: no sailor top, no ruffle skirt, no twin tails, no knee socks. Her long hair flows with her movement. Only this one figure changes, and everything else stays as in <Video 1>.\n\noverall_soundscape:\nThe source music track continues throughout, with its beat and the soft sound of her steps on the hallway floor.\n\nnon_diegetic_music:\nThe source dance music of <Video 1> continues unchanged.\n",
+    "",
+    124,
+    480
+   ],
+   "color": "#322",
+   "bgcolor": "#533"
+  },
+  {
+   "id": 17,
+   "type": "ViggleRemakeLongVideoByShenGun",
+   "pos": [
+    4980,
+    90
+   ],
+   "size": [
+    420,
+    250
+   ],
+   "flags": {},
+   "order": 29,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 30
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      34
+     ]
+    }
+   ],
+   "title": "长视频窗口 Long Video by神棍",
+   "properties": {
+    "Node name for S&R": "ViggleRemakeLongVideoByShenGun"
+   },
+   "widgets_values": [
+    0.9,
+    124,
+    39,
+    "pyramid",
+    true,
+    false,
+    true
+   ],
+   "color": "#322",
+   "bgcolor": "#533"
+  },
+  {
+   "id": 20,
+   "type": "BasicGuider",
+   "pos": [
+    5430,
+    90
+   ],
+   "size": [
+    280,
+    60
+   ],
+   "flags": {},
+   "order": 32,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 34
+    },
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 15
+    }
+   ],
+   "outputs": [
+    {
+     "name": "GUIDER",
+     "type": "GUIDER",
+     "links": [
+      17
+     ]
+    }
+   ],
+   "title": "BasicGuider",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "BasicGuider"
+   }
+  },
+  {
+   "id": 21,
+   "type": "ViggleRemakeNoiseByShenGun",
+   "pos": [
+    4980,
+    400
+   ],
+   "size": [
+    420,
+    100
+   ],
+   "flags": {},
+   "order": 25,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 14
+    }
+   ],
+   "outputs": [
+    {
+     "name": "NOISE",
+     "type": "NOISE",
+     "links": [
+      16
+     ]
+    }
+   ],
+   "title": "Viggle 噪声 Noise by神棍 (seed)",
+   "properties": {
+    "Node name for S&R": "ViggleRemakeNoiseByShenGun"
+   },
+   "widgets_values": [
+    903200468348621,
+    "randomize"
+   ],
+   "color": "#322",
+   "bgcolor": "#533"
+  },
+  {
+   "id": 22,
+   "type": "KSamplerSelect",
+   "pos": [
+    4980,
+    560
+   ],
+   "size": [
+    420,
+    60
+   ],
+   "flags": {},
+   "order": 13,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "SAMPLER",
+     "type": "SAMPLER",
+     "links": [
+      18
+     ]
+    }
+   ],
+   "title": "采样器 Sampler (euler)",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "KSamplerSelect"
+   },
+   "widgets_values": [
+    "euler"
+   ],
+   "widgets_values_named": {
+    "sampler_name": "euler"
+   }
+  },
+  {
+   "id": 23,
+   "type": "ManualSigmas",
+   "pos": [
+    4980,
+    680
+   ],
+   "size": [
+    420,
+    100
+   ],
+   "flags": {},
+   "order": 14,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "SIGMAS",
+     "type": "SIGMAS",
+     "links": [
+      19
+     ]
+    }
+   ],
+   "title": "Sigmas（6 步 steps，别改 do not change）",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "ManualSigmas"
+   },
+   "widgets_values": [
+    "1.0, 0.990476, 0.965243, 0.923077, 0.8, 0.631579, 0.0"
+   ],
+   "widgets_values_named": {
+    "sigmas": "1.0, 0.990476, 0.965243, 0.923077, 0.8, 0.631579, 0.0"
+   }
+  },
+  {
+   "id": 24,
+   "type": "SamplerCustomAdvanced",
+   "pos": [
+    5740,
+    90
+   ],
+   "size": [
+    320,
+    120
+   ],
+   "flags": {},
+   "order": 33,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "noise",
+     "type": "NOISE",
+     "link": 16
+    },
+    {
+     "name": "guider",
+     "type": "GUIDER",
+     "link": 17
+    },
+    {
+     "name": "sampler",
+     "type": "SAMPLER",
+     "link": 18
+    },
+    {
+     "name": "sigmas",
+     "type": "SIGMAS",
+     "link": 19
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 20
+    }
+   ],
+   "outputs": [
+    {
+     "name": "output",
+     "type": "LATENT",
+     "links": [
+      21,
+      23
+     ]
+    },
+    {
+     "name": "denoised_output",
+     "type": "LATENT",
+     "links": null
+    }
+   ],
+   "title": "采样 Sample",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "SamplerCustomAdvanced"
+   }
+  },
+  {
+   "id": 25,
+   "type": "MarkdownNote",
+   "pos": [
+    4980,
+    1380
+   ],
+   "size": [
+    1080,
+    420
+   ],
+   "flags": {},
+   "order": 15,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "说明 Note：窗口生成 / windowed generation",
+   "properties": {},
+   "widgets_values": [
+    "**窗口生成 / Windowed generation**\n长视频切成 124 帧（≈5.2 秒）的窗口，重叠 39 帧后融合。\nThe long video is cut into 124-frame windows (≈5.2 s) that overlap by 39 frames and are blended.\n\n`Viggle Remake Long Video by神棍` 一个节点包含：关键帧撤除（0.9）+ 官方 H3 上下文窗口 + 按窗口切源视频（`slice_source`）。官方窗口节点不切源视频，后面的窗口会重复开头的动作；`slice_source` 打开就让每个窗口只看对应那一段源视频。\n`Viggle Remake Long Video by神棍` = Keyframe Until (0.9) + the official H3 context windows + per-window source slicing (`slice_source`). The official window node does not cut the source, so later windows repeat the opening; with `slice_source` on each window sees only its own part of the source.\n\n采样 6 步，sigmas 来自官方示例，不要改。\n6 sampling steps; the sigmas come from the official example, do not change."
+   ],
+   "widgets_values_named": {
+    "text": "**窗口生成 / Windowed generation**\n长视频切成 124 帧（≈5.2 秒）的窗口，重叠 39 帧后融合。\nThe long video is cut into 124-frame windows (≈5.2 s) that overlap by 39 frames and are blended.\n\n`Slice Source By Window`（Viggle 节点包里的补丁）让每个窗口只看对应那一段源视频。官方窗口节点不切源视频，后面的窗口会重复开头的动作。\n`Slice Source By Window` (a patch in the Viggle node pack) makes each window see only its own part of the source. The official window node does not cut the source, so later windows repeat the opening motion.\n\n采样 6 步，sigmas 来自官方示例，不要改。\n6 sampling steps; the sigmas come from the official example, do not change."
+   },
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 26,
+   "type": "VAEDecode",
+   "pos": [
+    6140,
+    90
+   ],
+   "size": [
+    280,
+    50
+   ],
+   "flags": {},
+   "order": 34,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 21
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 22
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      25
+     ]
+    }
+   ],
+   "title": "解码视频 Decode video",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "VAEDecode"
+   }
+  },
+  {
+   "id": 27,
+   "type": "VAEDecodeAudio",
+   "pos": [
+    6140,
+    200
+   ],
+   "size": [
+    280,
+    50
+   ],
+   "flags": {},
+   "order": 35,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 23
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 24
+    }
+   ],
+   "outputs": [
+    {
+     "name": "AUDIO",
+     "type": "AUDIO",
+     "links": [
+      26
+     ]
+    }
+   ],
+   "title": "解码音频 Decode audio",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "VAEDecodeAudio"
+   }
+  },
+  {
+   "id": 28,
+   "type": "CreateVideo",
+   "pos": [
+    6450,
+    90
+   ],
+   "size": [
+    320,
+    180
+   ],
+   "flags": {},
+   "order": 36,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 25
+    },
+    {
+     "name": "audio",
+     "shape": 7,
+     "type": "AUDIO",
+     "link": 26
+    }
+   ],
+   "outputs": [
+    {
+     "name": "VIDEO",
+     "type": "VIDEO",
+     "links": [
+      27
+     ]
+    }
+   ],
+   "title": "合成视频 Create video（24fps + audio）",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "CreateVideo"
+   },
+   "widgets_values": [
+    24,
+    "auto",
+    "sRGB",
+    "auto",
+    "none"
+   ],
+   "widgets_values_named": {
+    "fps": 24,
+    "bit_depth": "auto",
+    "color_space": "sRGB",
+    "chroma_subsampling": "auto",
+    "codec": "none"
+   }
+  },
+  {
+   "id": 29,
+   "type": "SaveVideo",
+   "pos": [
+    6800,
+    90
+   ],
+   "size": [
+    440,
+    1220
+   ],
+   "flags": {},
+   "order": 37,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "video",
+     "type": "VIDEO",
+     "link": 27
+    }
+   ],
+   "outputs": [
+    {
+     "name": "video",
+     "type": "VIDEO",
+     "links": null
+    }
+   ],
+   "title": "保存成片 Save video",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "SaveVideo"
+   },
+   "widgets_values": [
+    "viggle_remake/swap",
+    "mp4",
+    "auto",
+    "auto"
+   ],
+   "widgets_values_named": {
+    "filename_prefix": "viggle_remake/swap",
+    "format": "mp4",
+    "format.codec": "auto",
+    "codec": "auto"
+   }
+  },
+  {
+   "id": 30,
+   "type": "MarkdownNote",
+   "pos": [
+    6140,
+    1380
+   ],
+   "size": [
+    1100,
+    230
+   ],
+   "flags": {},
+   "order": 16,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "说明 Note：输出 / output",
+   "properties": {},
+   "widgets_values": [
+    "**输出 / Output**\n成片带原视频的音频，24fps，保存在 `output/viggle_remake/`。个别素材开头会出现约 0.3 秒变黑再渐亮，可以裁掉前 9 帧。\nThe video keeps the original audio, 24 fps, saved in `output/viggle_remake/`. Some clips start with ~0.3 s of darkness that fades in; trim the first 9 frames if it happens."
+   ],
+   "widgets_values_named": {
+    "text": "**输出 / Output**\n成片带原视频的音频，24fps，保存在 `output/viggle_remake/`。个别素材开头会出现约 0.3 秒变黑再渐亮，可以裁掉前 9 帧。\nThe video keeps the original audio, 24 fps, saved in `output/viggle_remake/`. Some clips start with ~0.3 s of darkness that fades in; trim the first 9 frames if it happens."
+   },
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 31,
+   "type": "PrimitiveInt",
+   "pos": [
+    1420,
+    350
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 17,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "INT",
+     "type": "INT",
+     "links": [
+      28
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "PrimitiveInt"
+   },
+   "widgets_values": [
+    704,
+    "fixed"
+   ],
+   "widgets_values_named": {
+    "value": 704,
+    "control_after_generate": "fixed"
+   },
+   "color": "#322",
+   "bgcolor": "#533",
+   "title": "短边 short_edge（480～736，32 的倍数）"
+  },
+  {
+   "id": 32,
+   "type": "MarkdownNote",
+   "pos": [
+    4200,
+    1380
+   ],
+   "size": [
+    700,
+    1240
+   ],
+   "flags": {},
+   "order": 18,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "提示词模板 Prompt template（发给其他 AI，它会找你要素材）",
+   "properties": {},
+   "widgets_values": [
+    "# 提示词模板（发给其他 AI 用） / Prompt template (give it to another AI)\n\n**怎么用 / How to use**\n1. 把下面代码框里的整段发给 ChatGPT / Claude / Gemini 等 AI：作为第一条消息发，或放进它的自定义指令 / 系统提示词。\n   Send the whole code block to ChatGPT / Claude / Gemini etc., as the first message or as its custom instructions / system prompt.\n2. AI 会找你要三样东西：源视频（看不了视频就要关键帧）、参考图（按 Picture 1、2… 的顺序）、一句简单描述（谁换成谁）。按它说的发过去。\n   The AI asks for the source video (or key frames), the reference images in order, and a one-line description of who becomes whom.\n3. AI 回复的代码框里就是按规范扩写好的英文提示词，整段复制，粘贴到“② 帧数 & 短边”组里红色的提示词文本框。\n   Its code block is the finished English prompt: paste it into the red prompt text box in group ②.\n4. 单人替换比较稳定；多人替换不稳定时，先不要改提示词，换 `Viggle Remake Noise by神棍` 的 seed 多抽几次。\n   Single-person swaps are fairly stable. If a multi-person swap is unstable, change the seed in `Viggle Remake Noise by神棍` before touching the prompt.\n\n```text\nYou are my prompt writer for the \"Viggle Remake\" video character-swap model (ComfyUI). Talk to me in Chinese. The prompt you write is in English.\n\nSTEP 1 - ASK FOR THE MATERIAL\nIn your first reply, do not write a prompt yet. Ask me, briefly and in Chinese, for:\n1. The source video. If you cannot watch video, ask for 4-8 key frames with their timestamps and the total length instead.\n2. The reference images, in order: Picture 1, Picture 2, ... (at most 4). Each one is a character sheet of one person: a face close-up plus full-body front, side and back views on a plain white background.\n3. A short description: who in the video becomes which picture, and anything that must stay or change.\n\nSTEP 2 - CHECK\nStudy everything: the video length, every shot and cut with its timestamps, and for every person their position in the frame, clothing, hair and actions. If it is unclear who becomes whom, or a picture matches nobody, ask me once, in one short Chinese message. Otherwise go straight to step 3.\n\nSTEP 3 - WRITE THE PROMPT\nWrite ONE prompt in English, in exactly the six sections below and in this order. Put the whole prompt in a single code block so I can copy it in one go. Outside the code block write at most two short Chinese lines, only about what you were unsure of. Nothing else.\n\nNaming rules\n- <Video 1> = the source video. Never treat it as a reference image.\n- <Picture N> = the Nth reference image, in the order I gave them. Each one is a character sheet, NOT a frame of the video.\n- <Subject N> = a person in the source video who gets replaced. Number them in the same order as the pictures, so <Subject 1> becomes the person in <Picture 1>.\n\nThe six sections (use these exact headings, each followed by a colon)\nsubject_definitions:\n  - Describe <Video 1> in one sentence: shot type, location, light, what happens.\n  - Describe each <Picture N>: \"a character reference sheet of ... shown four times side by side on a plain white background: a face close-up, a full-body front view, a side view and a back view\".\n  - For each <Subject N>: who he or she is in the source video (position in the frame, clothing, hair, what he or she does - specific enough to tell him or her apart from everyone else in frame), then \"is replaced by the person in <Picture N>:\" followed by that person's face, hair, clothing, shoes and accessories copied from the sheet.\nsummary:\n  - Start with \"[video editing + character replacement]\". One paragraph: each subject becomes the matching picture; what stays unchanged (location, light, subtitles, watermark, people who are not swapped); the camera, cuts, motion and timing of <Video 1> are kept.\nretention_analysis:\n  - One line for <Video 1> (fully_preserved: every shot and cut, camera framing and movement, location, light, subtitles, people who are not swapped, every move and its timing).\n  - One line for each <Picture N> (reference: which features are taken from the sheet; the white background is not used).\n  - One line for each <Subject N> (fully_preserved: face, hair and outfit stay identical in every frame, also when turning, moving fast or close to the camera; list the shots he or she appears in).\ndetailed_description:\n  - One sentence for the overall look. Then one entry per shot: \"[Shot k] 00:00.000-00:02.458\" with the time range, who is in it, where, and what they do, with \"At about MM:SS.mmm ...\" for the main moves. Keep the real timestamps of the source video.\n  - End with: \"In every frame, from the first to the last, each person is exactly the one from the matching sheet: no <list the original clothes and hair that must disappear>. Only these people change, and everything else stays as in <Video 1>.\"\noverall_soundscape:\n  - Say that the source soundtrack continues unchanged (voices, music, ambience).\nnon_diegetic_music:\n  - \"N/A\", or say that the source music continues.\n\nRules\n- The prompt is all English. Be concrete and visual; no opinions.\n- Describe the target video; do not write instructions (\"a woman in a red coat walks\", not \"replace the man with a woman\").\n- retention_analysis is obeyed literally: whatever it calls preserved stays, whatever it calls replaced changes.\n- Timestamps use MM:SS.mmm and must fit inside the video length (the video is read at 24 fps).\n- At most 4 pictures. People who are not swapped stay as they are; mention them only as part of <Video 1>.\n- Do not invent shots, people or actions that are not in the material.\n- Do not mention pins or keyframes.\n- Keep every <Subject N> description specific enough to exclude similar-looking people.\n```\n"
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 33,
+   "type": "MiniMaxChunkFeedForward",
+   "pos": [
+    3450,
+    90
+   ],
+   "size": [
+    320,
+    90
+   ],
+   "flags": {},
+   "order": 27,
+   "mode": 4,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 33
+    }
+   ],
+   "outputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "links": [
+      29
+     ]
+    }
+   ],
+   "title": "省显存：前馈分块（默认屏蔽）",
+   "properties": {
+    "cnr_id": "comfyui-kjnodes",
+    "ver": "57105374f47d0fbb49c9c3926fb981702e0a4b5c",
+    "Node name for S&R": "MiniMaxChunkFeedForward"
+   },
+   "widgets_values": [
+    4,
+    4096
+   ],
+   "widgets_values_named": {
+    "chunks": 4,
+    "seq_threshold": 4096
+   }
+  },
+  {
+   "id": 34,
+   "type": "MiniMaxLowVRAMAttention",
+   "pos": [
+    3800,
+    90
+   ],
+   "size": [
+    320,
+    60
+   ],
+   "flags": {},
+   "order": 28,
+   "mode": 4,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 29
+    }
+   ],
+   "outputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "links": [
+      30
+     ]
+    }
+   ],
+   "title": "省显存：注意力分块（默认屏蔽）",
+   "properties": {
+    "cnr_id": "comfyui-kjnodes",
+    "ver": "57105374f47d0fbb49c9c3926fb981702e0a4b5c",
+    "Node name for S&R": "MiniMaxLowVRAMAttention"
+   },
+   "widgets_values": [
+    4
+   ],
+   "widgets_values_named": {
+    "head_chunks": 4
+   }
+  },
+  {
+   "id": 35,
+   "type": "MarkdownNote",
+   "pos": [
+    2400,
+    1380
+   ],
+   "size": [
+    1720,
+    330
+   ],
+   "flags": {},
+   "order": 19,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "说明 Note：省显存节点 / low-VRAM nodes",
+   "properties": {},
+   "widgets_values": [
+    "**省显存（默认屏蔽） / Low-VRAM (bypassed by default)**\n“④ LoRA & 加速 / 省显存”组里的这两个 KJNodes 节点把注意力和前馈层分块算，画面结果不变，只是峰值显存更低。\nThe two KJNodes nodes in group \"④ LoRA & 加速 / 省显存\" compute attention and the feed-forward layers in chunks: same result, lower peak VRAM.\n\n- **低显存用户**：选中两个节点按 `Ctrl+B` 取消屏蔽。\n  **Low-VRAM GPUs**: select both nodes and press `Ctrl+B` to enable them.\n- **高配用户**：保持屏蔽（紫色），开了会变慢。\n  **High-end GPUs**: keep them bypassed (purple); enabling them slows generation.\n\n需要较新的 ComfyUI-KJNodes。 / Needs a recent ComfyUI-KJNodes."
+   ],
+   "widgets_values_named": {
+    "text": "**省显存（默认屏蔽） / Low-VRAM (bypassed by default)**\n这两个 KJNodes 节点把注意力和前馈层分块算，画面结果不变，只是峰值显存更低。\nThese two KJNodes nodes compute attention and the feed-forward layers in chunks: same result, lower peak VRAM.\n\n- **低显存用户**：选中两个节点按 `Ctrl+B` 取消屏蔽。\n  **Low-VRAM GPUs**: select both nodes and press `Ctrl+B` to enable them.\n- **高配用户**：保持屏蔽（紫色），开了会变慢。\n  **High-end GPUs**: keep them bypassed (purple); enabling them slows generation.\n\n需要较新的 ComfyUI-KJNodes。 / Needs a recent ComfyUI-KJNodes."
+   },
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 36,
+   "type": "MarkdownNote",
+   "pos": [
+    1420,
+    1910
+   ],
+   "size": [
+    400,
+    420
+   ],
+   "flags": {},
+   "order": 20,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "说明 Note：短边取值 / short_edge range",
+   "properties": {},
+   "widgets_values": [
+    "**短边 short_edge 取值 / Allowed values**\n- 范围 **480～736**，必须是 **32 的倍数**：480、512、544、576、608、640、672、704、736。\n  Range **480–736**, a **multiple of 32**.\n- 官方只支持 **480** 和 **736** 两档；我实测 480 稳定，576 多人长镜头出现过脸没换成功。\n  Officially only **480** and **736**; 480 is stable in my tests, 576 failed on faces in a long multi-person shot.\n- ⚠️ 这个值是用连线送进节点的，**填超过 736 不会报错**，会照样按更大的分辨率跑，但效果没保证、显存会暴涨（5090 上 736P 跑 9.4 秒就接近 32G 上限）。不是 32 的倍数也可能出错。\n  ⚠️ This value goes in through a link, so **values above 736 do not raise an error**: it runs at the larger size anyway, with no quality guarantee and much higher VRAM (736P for 9.4 s already nears 32 GB on a 5090). Non-multiples of 32 may break."
+   ],
+   "widgets_values_named": {
+    "text": "**短边 short_edge 取值 / Allowed values**\n- 范围 **480～736**，必须是 **32 的倍数**：480、512、544、576、608、640、672、704、736。\n  Range **480–736**, a **multiple of 32**.\n- 官方只支持 **480** 和 **736** 两档；我实测 480 稳定，576 多人长镜头出现过脸没换成功。\n  Officially only **480** and **736**; 480 is stable in my tests, 576 failed on faces in a long multi-person shot.\n- ⚠️ 这个值是用连线送进节点的，**填超过 736 不会报错**，会照样按更大的分辨率跑，但效果没保证、显存会暴涨（5090 上 736P 跑 9.4 秒就接近 32G 上限）。不是 32 的倍数也可能出错。\n  ⚠️ This value goes in through a link, so **values above 736 do not raise an error**: it runs at the larger size anyway, with no quality guarantee and much higher VRAM (736P for 9.4 s already nears 32 GB on a 5090). Non-multiples of 32 may break."
+   },
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 37,
+   "type": "BlockSparseAttention",
+   "pos": [
+    2750,
+    90
+   ],
+   "size": [
+    320,
+    250
+   ],
+   "flags": {},
+   "order": 24,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 31
+    }
+   ],
+   "outputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "links": [
+      32
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "BlockSparseAttention"
+   },
+   "widgets_values": [
+    "sol-attn",
+    1.3,
+    0.2,
+    1,
+    "",
+    12288,
+    256,
+    "exact_kv_and_rows",
+    false
+   ],
+   "widgets_values_named": {
+    "selection": "sol-attn",
+    "selection.tau": 1.3,
+    "start_percent": 0.2,
+    "end_percent": 1,
+    "dense_blocks": "",
+    "min_tokens": 12288,
+    "extra_tokens": 256,
+    "sink_conditioning": "exact_kv_and_rows",
+    "verbose": false
+   },
+   "title": "加速：块稀疏注意力 BlockSparseAttention"
+  },
+  {
+   "id": 38,
+   "type": "ModelAttentionBackend",
+   "pos": [
+    3100,
+    90
+   ],
+   "size": [
+    320,
+    60
+   ],
+   "flags": {},
+   "order": 26,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 32
+    }
+   ],
+   "outputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "links": [
+      33
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.44.0",
+    "Node name for S&R": "ModelAttentionBackend"
+   },
+   "widgets_values": [
+    "comfy kitchen attention"
+   ],
+   "widgets_values_named": {
+    "attention": "comfy kitchen attention"
+   },
+   "title": "加速：注意力后端 Attention backend"
+  }
+ ],
+ "links": [
+  [
+   1,
+   10,
+   0,
+   11,
+   0,
+   "MODEL"
+  ],
+  [
+   6,
+   12,
+   0,
+   16,
+   0,
+   "CLIP"
+  ],
+  [
+   7,
+   13,
+   0,
+   16,
+   1,
+   "VAE"
+  ],
+  [
+   8,
+   14,
+   0,
+   16,
+   2,
+   "VAE"
+  ],
+  [
+   9,
+   2,
+   0,
+   16,
+   3,
+   "IMAGE"
+  ],
+  [
+   10,
+   2,
+   2,
+   16,
+   5,
+   "AUDIO"
+  ],
+  [
+   11,
+   2,
+   1,
+   3,
+   0,
+   "INT"
+  ],
+  [
+   12,
+   3,
+   1,
+   16,
+   9,
+   "INT"
+  ],
+  [
+   13,
+   5,
+   0,
+   16,
+   4,
+   "IMAGE"
+  ],
+  [
+   14,
+   16,
+   0,
+   21,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   15,
+   16,
+   0,
+   20,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   16,
+   21,
+   0,
+   24,
+   0,
+   "NOISE"
+  ],
+  [
+   17,
+   20,
+   0,
+   24,
+   1,
+   "GUIDER"
+  ],
+  [
+   18,
+   22,
+   0,
+   24,
+   2,
+   "SAMPLER"
+  ],
+  [
+   19,
+   23,
+   0,
+   24,
+   3,
+   "SIGMAS"
+  ],
+  [
+   20,
+   16,
+   1,
+   24,
+   4,
+   "LATENT"
+  ],
+  [
+   21,
+   24,
+   0,
+   26,
+   0,
+   "LATENT"
+  ],
+  [
+   22,
+   13,
+   0,
+   26,
+   1,
+   "VAE"
+  ],
+  [
+   23,
+   24,
+   0,
+   27,
+   0,
+   "LATENT"
+  ],
+  [
+   24,
+   14,
+   0,
+   27,
+   1,
+   "VAE"
+  ],
+  [
+   25,
+   26,
+   0,
+   28,
+   0,
+   "IMAGE"
+  ],
+  [
+   26,
+   27,
+   0,
+   28,
+   1,
+   "AUDIO"
+  ],
+  [
+   27,
+   28,
+   0,
+   29,
+   0,
+   "VIDEO"
+  ],
+  [
+   28,
+   31,
+   0,
+   16,
+   10,
+   "INT"
+  ],
+  [
+   29,
+   33,
+   0,
+   34,
+   0,
+   "MODEL"
+  ],
+  [
+   30,
+   34,
+   0,
+   17,
+   0,
+   "MODEL"
+  ],
+  [
+   31,
+   11,
+   0,
+   37,
+   0,
+   "MODEL"
+  ],
+  [
+   32,
+   37,
+   0,
+   38,
+   0,
+   "MODEL"
+  ],
+  [
+   33,
+   38,
+   0,
+   33,
+   0,
+   "MODEL"
+  ],
+  [
+   34,
+   17,
+   0,
+   20,
+   0,
+   "MODEL"
+  ]
+ ],
+ "groups": [
+  {
+   "id": 1,
+   "title": "① 素材上传（视频 + 参考图，每次要改）",
+   "bounding": [
+    0,
+    0,
+    1360,
+    2640
+   ],
+   "color": "#666",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 2,
+   "title": "② 帧数 & 短边",
+   "bounding": [
+    1400,
+    0,
+    440,
+    2640
+   ],
+   "color": "#666",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 3,
+   "title": "③ 模型加载",
+   "bounding": [
+    1880,
+    0,
+    460,
+    2640
+   ],
+   "color": "#666",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 4,
+   "title": "④ LoRA & 加速 / 省显存",
+   "bounding": [
+    2380,
+    0,
+    1760,
+    2640
+   ],
+   "color": "#666",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 5,
+   "title": "⑤ 提示词与条件（每次要改）",
+   "bounding": [
+    4180,
+    0,
+    740,
+    2640
+   ],
+   "color": "#666",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 6,
+   "title": "⑥ 长视频窗口 & 采样",
+   "bounding": [
+    4960,
+    0,
+    1120,
+    2640
+   ],
+   "color": "#666",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 7,
+   "title": "⑦ 解码 & 输出",
+   "bounding": [
+    6120,
+    0,
+    1140,
+    2640
+   ],
+   "color": "#666",
+   "font_size": 24,
+   "flags": {}
+  }
+ ],
+ "config": {},
+ "extra": {
+  "ds": {
+   "scale": 0.25,
+   "offset": [
+    40,
+    40
+   ]
+  },
+  "frontendVersion": "1.58.5",
+  "VHS_latentpreview": true,
+  "VHS_latentpreviewrate": 0,
+  "VHS_MetadataImage": false,
+  "VHS_KeepIntermediate": false
+ },
+ "extensions": {
+  "seed_widgets": {
+   "21": 0
+  }
+ },
+ "version": 0.4,
+ "seed_widgets": {
+  "21": 0
+ }
+}
