@@ -1,0 +1,14 @@
+[project]
+name = "comfyui-viggle-remake-longvideo"
+description = "Long-video Viggle Remake for ComfyUI: Keyframe Until + MiniMax H3 Context Windows + per-window source slicing in one node (by神棍)."
+version = "1.0.0"
+license = { file = "LICENSE" }
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/SGUN-father/ComfyUI-Viggle-Remake-LongVideo"
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "Viggle Remake Long Video (by神棍)"
+Icon = ""

@@ -1,0 +1,16 @@
+ComfyUI-Viggle-Remake-LongVideo (by神棍)
+
+This node pack contains code derived from the Viggle Remake ComfyUI node pack
+(https://huggingface.co/Viggle/Viggle-Remake, comfyui/ComfyUI-Viggle-Remake),
+Copyright © 2026 Viggle AI, licensed under the Apache License 2.0.
+
+Changes: the Conditioning and Noise nodes are copied under new names, with the Conditioning
+`frames` limit raised from 345 to 10000; the Keyframe Until logic is reused unchanged and
+combined with the context-window setup and a per-window source slicing step into one node.
+All node names differ from the official ones, so the pack can be installed next to the
+official pack without replacing it.
+
+The Viggle Remake model weights are not part of this repository and are not covered by
+this licence; they are distributed under the MiniMax H3 Community License Agreement.
+
+Powered by Viggle Remake (https://huggingface.co/Viggle/Viggle-Remake)
