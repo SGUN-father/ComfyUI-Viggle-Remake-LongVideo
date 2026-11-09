@@ -1,18 +1,15 @@
-# Viggle Remake Long Video (by神棍)
+# ComfyUI Viggle Remake Long Video
 
-让 Viggle Remake 视频换人支持长视频（15～20 秒以上）的 ComfyUI 节点包。
-A ComfyUI node pack that lets Viggle Remake swap people in long videos (15–20 s and more).
-
-所有节点都改了名字（带 `by神棍`），可以和官方 Viggle 节点包同时安装，互不影响；不装官方包也能单独用。
-Every node has its own name (`by神棍`), so the pack installs next to the official Viggle pack without clashing, and also works without it.
+让 Viggle Remake 视频换人支持长视频（15～20 秒以上）的 ComfyUI 节点包。可以和官方 Viggle 节点包同时安装，也可以单独使用。
+A ComfyUI node pack that lets Viggle Remake swap people in long videos (15–20 s and more). Works next to the official Viggle pack or on its own.
 
 ## 节点 / Nodes
 
-| 节点 / Node | 对应官方 / Official counterpart | 改了什么 / Change |
-|---|---|---|
-| **Viggle Remake Conditioning by神棍** | Viggle Remake Conditioning | `frames` 上限 345 → 10000，其余代码不变 / `frames` limit 345 → 10000, otherwise unchanged |
-| **Viggle Remake Noise by神棍** | Viggle Remake Noise | 只改名 / renamed only |
-| **Viggle Remake Long Video by神棍** | Keyframe Until + MiniMax H3 Context Windows + Slice Source By Window | 三个合成一个 / three in one |
+| 节点 / Node | 功能 / What it does |
+|---|---|
+| **Viggle Remake Conditioning** | 把源视频、参考图、提示词和原音频编码成条件，`frames` 最多 10000 帧（官方是 345），长视频可以直接用。 / Encodes the source video, reference images, prompt and soundtrack; `frames` up to 10000 (official: 345). |
+| **Viggle Remake Noise** | 按官方参考脚本的顺序生成初始噪声，同一个 seed 出同样的视频。 / Draws the starting noise in the reference script's order, so a seed gives the same video. |
+| **Viggle Remake Long Video** | 关键帧撤除 + H3 上下文窗口 + 按窗口切源视频，一个节点完成长视频分窗口生成。 / Keyframe Until + H3 context windows + per-window source slicing in one node. |
 
 ### Long Video 节点做什么 / What the Long Video node does
 
@@ -33,9 +30,9 @@ Every node has its own name (`by神棍`), so the pack installs next to the offic
 ## 用法 / Usage
 
 ```
-模型 + LoRA → Viggle Remake Long Video by神棍 → BasicGuider ─┐
-Viggle Remake Conditioning by神棍 → positive → BasicGuider     ├→ SamplerCustomAdvanced
-                                  → positive → Viggle Remake Noise by神棍
+模型 + LoRA → Viggle Remake Long Video → BasicGuider ─┐
+Viggle Remake Conditioning → positive → BasicGuider     ├→ SamplerCustomAdvanced
+                                  → positive → Viggle Remake Noise
                                   → latent ─────────────────────┘
 ```
 
